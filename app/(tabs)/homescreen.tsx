@@ -1,15 +1,49 @@
 import React from "react";
 import { Button, View, Text, StyleSheet, TextInput } from "react-native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
+import SocketIOClient from 'socket.io-client';
 
-type HomeScreenProps = {
-    navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
-};
+const socket = SocketIOClient('http://192.168.116.1:3000');
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen({ navigation }: any) {
     const [roomId, onChangeRoomId] = React.useState('Room ID');
-    console.log(navigation);
+
+    // socket stuff
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+      });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+
+    const createRoom = async () => {
+        console.log('sending request to server')
+
+        // create room
+        const ack = await socket.emitWithAck('createRoom');
+
+        navigation.navigate('Details', { roomId: ack[1] });
+    }
+
+    const joinRoom = async (room: String) => {
+        console.log('sending request to server');
+
+        // join room
+        const ack = await socket.emitWithAck('joinRoom', room);
+
+        if (ack[0]) navigation.navigate('Details', { roomId: ack[1] });
+
+        onChangeRoomId('enter valid id');
+    }
+
+    const handleCreateRoom = () => createRoom();
+    const handleJoinRoom = () => joinRoom(roomId);
+
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -21,12 +55,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             />
             <Button
                 title="Join Room"
-                onPress={() => navigation.navigate('Details')}
+                onPress={handleJoinRoom}
             />
             <Text>Don't have a room ID?</Text>
             <Button
                 title="Create Room"
-                onPress={() => navigation.navigate('Details')}
+                onPress={handleCreateRoom}
             />
         </View>
     );
