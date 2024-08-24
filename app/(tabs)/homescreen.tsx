@@ -1,7 +1,13 @@
 import React from "react";
 import { Button, View, Text, StyleSheet, TextInput } from "react-native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './types';
 
-export default function HomeScreen({ navigation }) {
+type HomeScreenProps = {
+    navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
+};
+
+export default function HomeScreen({ navigation }: HomeScreenProps) {
     const [roomId, onChangeRoomId] = React.useState('Room ID');
     console.log(navigation);
 
