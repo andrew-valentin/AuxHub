@@ -3,7 +3,12 @@ import { Button, View, Text, StyleSheet, TextInput } from "react-native";
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import SocketIOClient from 'socket.io-client';
 
-const socket = SocketIOClient('http://192.168.116.1:3000');
+const socket = SocketIOClient('https://auxhubserver.onrender.com', {
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    timeout: 10000
+  });
 
 export default function HomeScreen({ navigation }: any) {
     const [roomId, onChangeRoomId] = React.useState('Room ID');
@@ -14,7 +19,7 @@ export default function HomeScreen({ navigation }: any) {
     });
 
     socket.on('connect_error', (error) => {
-        console.error('Connection error:', error);
+        console.error('Connection error:', error.message);
       });
 
     socket.on('disconnect', () => {
